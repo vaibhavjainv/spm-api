@@ -1,0 +1,28 @@
+GET http://localhost:3000/api/getallresources
+
+POST http://localhost:3000/api/addresource
+content-type: application/json
+
+{
+    "name": "James Phillips",
+    "location": "onshore",
+    "rate": "150",
+    "projects": [
+        {
+            "account": "ABC",
+            "assignment": "XYZ",
+            "allocation": [
+               {
+                    "week": "5/9/2018",
+                    "hours": "20"
+                },
+                {
+                    "week": "5/16/2018",
+                    "hours": "40"
+                }
+            ]
+        }
+    ]
+}
+
+PUT http://localhost:3000/api/updateresource/123
