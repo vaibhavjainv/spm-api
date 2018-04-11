@@ -1,10 +1,10 @@
-GET http://localhost:3000/api/getallresources
+GET http://localhost:3000/api/resources/getall
 
-POST http://localhost:3000/api/addresource
+POST http://localhost:3000/api/resources/add
 content-type: application/json
 
 {
-    "name": "James Phillips",
+    "name": "Vaibhav Jain",
     "location": "onshore",
     "rate": "150",
     "projects": [
@@ -25,6 +25,29 @@ content-type: application/json
     ]
 }
 
-PUT http://localhost:3000/api/updateresource/123
+PUT http://localhost:3000/api/resources/updateallocation
+content-type: application/json
 
-PUT http://localhost:3000/api/deleteresource/123
+{
+    "_id":"5ace3ad431370c218356c3f1",
+    "projects":[
+        {    
+            "account":"ABC",
+            "assignment":"123",
+            "allocation": [
+                {
+                    "week": "5/9/2018",
+                    "hours": 10
+                },
+                {
+                    "week": "5/16/2018",
+                    "hours": 24
+                }
+            ]
+        }
+    ]
+}
+
+
+
+DELETE  http://localhost:3000/api/resources/delete/5ace00203b4b903296621284
