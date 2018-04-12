@@ -49,6 +49,7 @@ var getAssignmentMap = function (resources) {
             res["role"] = project.role;
             res["allocation"] = {};
             res["totalhours"] = 0;
+            res["id"] = resource._id;
 
             project.allocation.forEach(allocation => {
                 if (assignment.startWeek == undefined || assignment.startWeek > allocation.week) {
@@ -137,12 +138,12 @@ var getAllAssignments = function (res) {
 }
 
 var addResource = function (req, res) {
-
     initResources(function () {
         var resource = new Resource(req.body);
         resource.save(function (err, resource) {
             if (err) return console.error(err);
-            res.status(200).send(resource);
+            //res.status(200).send(resource);
+            getAllAssignments(res);
         });
 
     }
@@ -155,7 +156,8 @@ var deleteResource = function (req, res) {
 
         Resource.remove({ _id: req.params.id }, function (err) {
             if (err) return handleError(err);
-            res.status(200).send('Deleted');
+            //res.status(200).send('Deleted');
+            getAllAssignments(res);
         });
 
     }

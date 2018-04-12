@@ -6,7 +6,7 @@ POST http://localhost:3000/api/resources/add
 content-type: application/json
 
 {
-    "name": "Vaibhav Jain",
+    "name": "TTTT Jain",
     "location": "onshore",
     "projects": [
         {
