@@ -7,6 +7,7 @@ var getAllResources = function (res) {
             if (err)
                 return console.error(err);
             var data = resources;
+
             // Website you wish to allow to connect
             res.setHeader('Access-Control-Allow-Origin', '*');
 
@@ -16,8 +17,68 @@ var getAllResources = function (res) {
             // Request headers you wish to allow
             res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
 
-            
+
             res.status(200).send(data);
+        });
+    }
+    );
+}
+
+var getAssignmentMap = function (resources) {
+    var assignmentMap = {}
+    resources.forEach(resource => {
+        resource.projects.forEach(project => {
+            var key = project.account + "-" + project.assignment;
+            var assignment = {};
+            
+            if(assignmentMap[key] != undefined){
+                assignment = assignmentMap[key];
+            }
+
+            assignment["name"] = project.assignment;
+            assignment["account"] = project.account;
+            if(assignment["resources"] == undefined){
+                assignment["resources"] = {};
+            }
+
+            var res = {};
+
+            res["name"] = resource.name;
+            res["location"] = resource.location;
+            res["rate"] = project.rate;
+            res["role"] = project.role;
+            res["allocation"]= project.allocation;
+
+
+            assignment.resources[resource.name] = res;
+
+            assignmentMap[key] = assignment;
+            
+        });
+    });
+    return assignmentMap;
+}
+
+var getAllAssignments = function (res) {
+
+    initResources(function () {
+        Resource.find(function (err, resources) {
+            if (err)
+                return console.error(err);
+            var data = resources;
+
+            var assignmentMap = getAssignmentMap(resources);
+
+            // Website you wish to allow to connect
+            res.setHeader('Access-Control-Allow-Origin', '*');
+
+            // Request methods you wish to allow
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+            // Request headers you wish to allow
+            res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
+            res.status(200).send(assignmentMap);
         });
     }
     );
@@ -76,11 +137,12 @@ var initResources = function (callback) {
             var resourceSchema = mongoose.Schema({
                 name: String,
                 location: String,
-                rate: Number,
                 projects: [
                     {
                         account: String,
                         assignment: String,
+                        rate: Number,
+                        role: String,
                         allocation: [
                             {
                                 week: Date,
@@ -178,5 +240,6 @@ module.exports = {
     getAllResources,
     addResource,
     deleteResource,
-    updateallocation
+    updateallocation,
+    getAllAssignments
 }

@@ -17,6 +17,10 @@ var appRouter = function (app) {
     app.delete("/api/resources/delete/:id", function (req, res) {
         resources.deleteResource(req, res);
     });
+
+    app.get("/api/assignments/getall", function (req, res) {
+        resources.getAllAssignments(res);
+    });
 }
 
 module.exports = appRouter;
