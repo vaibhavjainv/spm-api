@@ -6,21 +6,26 @@ POST http://localhost:3000/api/resources/add
 content-type: application/json
 
 {
-    "name": "Jay Karlin",
+    "name": "Vaibhav Jain",
     "location": "onshore",
-    "rate": "150",
     "projects": [
         {
             "account": "ABC",
-            "assignment": "XYZ",
+            "assignment": "AAD",
+            "rate": 150,
+            "role": "Architect",
             "allocation": [
                {
                     "week": "5/9/2018",
                     "hours": "20"
                 },
                 {
+                    "week": "5/30/2018",
+                    "hours": "20"
+                },
+                {
                     "week": "5/16/2018",
-                    "hours": "40"
+                    "hours": "10"
                 }
             ]
         }

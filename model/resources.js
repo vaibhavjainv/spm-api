@@ -30,15 +30,15 @@ var getAssignmentMap = function (resources) {
         resource.projects.forEach(project => {
             var key = project.account + "-" + project.assignment;
             var assignment = {};
-            
-            if(assignmentMap[key] != undefined){
+
+            if (assignmentMap[key] != undefined) {
                 assignment = assignmentMap[key];
             }
 
             assignment["name"] = project.assignment;
             assignment["account"] = project.account;
-            if(assignment["resources"] == undefined){
-                assignment["resources"] = {};
+            if (assignment["resources"] == undefined) {
+                assignment["resources"] = [];
             }
 
             var res = {};
@@ -47,16 +47,68 @@ var getAssignmentMap = function (resources) {
             res["location"] = resource.location;
             res["rate"] = project.rate;
             res["role"] = project.role;
-            res["allocation"]= project.allocation;
+            res["allocation"] = {};
+            res["totalhours"] = 0;
+
+            project.allocation.forEach(allocation => {
+                if (assignment.startWeek == undefined || assignment.startWeek > allocation.week) {
+                    assignment["startWeek"] = allocation.week;
+                }
+                if (assignment.endWeek == undefined || assignment.endWeek < allocation.week) {
+                    assignment["endWeek"] = allocation.week;
+                }
+                res.allocation[new Date(allocation.week).toDateString()]=allocation.hours;
+                res.totalhours=res.totalhours+allocation.hours;
+
+                if(assignment["assignmentHours"] == undefined){
+                    assignment["assignmentHours"] = 0;
+                }
+                assignment["assignmentHours"] = assignment.assignmentHours + allocation.hours;
+            });
+
+            res["totalcost"] = res.totalhours * res.rate;
 
 
-            assignment.resources[resource.name] = res;
+            if(assignment["assignmentCost"] == undefined){
+                assignment["assignmentCost"] = 0;
+            }
+            assignment["assignmentCost"] = assignment.assignmentCost + res.totalcost;
+
+            assignment.resources[assignment.resources.length] = res;
 
             assignmentMap[key] = assignment;
-            
+
         });
     });
-    return assignmentMap;
+
+    var assignmentArr = [];
+
+    for (var assignmentname in assignmentMap) {
+        assignment = assignmentMap[assignmentname]
+        assignment["weeks"] = [];
+        
+        var nextWeek = new Date(assignment.startWeek);
+        var endWeek = new Date(assignment.endWeek);
+
+        assignment.weeks[assignment.weeks.length] = nextWeek.toDateString();
+       
+        var contine = true;
+
+        while (contine) {
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            if (nextWeek < endWeek) {
+                assignment.weeks[assignment.weeks.length] = nextWeek.toDateString();
+            }else{
+                assignment.weeks[assignment.weeks.length] = endWeek.toDateString();
+                contine = false;
+            }
+        }
+
+        assignmentArr.push(assignment);
+    }
+
+
+    return assignmentArr;
 }
 
 var getAllAssignments = function (res) {
