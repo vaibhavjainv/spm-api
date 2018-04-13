@@ -6,10 +6,30 @@ POST http://localhost:3000/api/resources/add
 content-type: application/json
 
 {
-    "name": "TTTT Jain",
+    "name": "Abhinav G",
     "location": "onshore",
     "projects": [
         {
+            "account": "ABC",
+            "assignment": "AAE",
+            "rate": 150,
+            "role": "Architect",
+            "allocation": [
+               {
+                    "week": "5/9/2018",
+                    "hours": "20"
+                },
+                {
+                    "week": "5/30/2018",
+                    "hours": "20"
+                },
+                {
+                    "week": "5/16/2018",
+                    "hours": "10"
+                }
+            ]
+        },
+         {
             "account": "ABC",
             "assignment": "AAD",
             "rate": 150,
@@ -45,7 +65,7 @@ content-type: application/json
             "role": "Architect",
             "allocation": [
                {
-                    "week": "5/9/2018",
+                    "week": "5/9/2018",k
                     "hours": "20"
                 },
                 {

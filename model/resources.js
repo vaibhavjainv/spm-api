@@ -112,7 +112,7 @@ var getAssignmentMap = function (resources) {
     return assignmentArr;
 }
 
-var getAllAssignments = function (res) {
+var getAllAssignments = function (res,errormap) {
 
     initResources(function () {
         Resource.find(function (err, resources) {
@@ -121,6 +121,10 @@ var getAllAssignments = function (res) {
             var data = resources;
 
             var assignmentMap = getAssignmentMap(resources);
+
+            if(errormap!=undefined){
+                assignmentMap.push(errormap);
+            }
 
             // Website you wish to allow to connect
             res.setHeader('Access-Control-Allow-Origin', '*');
@@ -139,12 +143,45 @@ var getAllAssignments = function (res) {
 
 var addResource = function (req, res) {
     initResources(function () {
-        var resource = new Resource(req.body);
-        resource.save(function (err, resource) {
-            if (err) return console.error(err);
-            //res.status(200).send(resource);
-            getAllAssignments(res);
+        Resource.find({ name: req.body.name, location: req.body.location }, function (err, docs) {
+            if (docs.length == 0) {
+                var resource = new Resource(req.body);
+                resource.save(function (err, resource) {
+                    if (err) return console.error(err);
+                    getAllAssignments(res);
+                });
+            } else if (docs.length == 1) {
+                req.body.projects.forEach(incomingProject => {
+                    var processed = false;
+                   
+                    docs[0].projects.forEach(existingProject => {
+                        if (existingProject.assignment == incomingProject.assignment && existingProject.account == incomingProject.account && !processed) {
+                            existingProject.rate = incomingProject.rate;
+                            existingProject.role = incomingProject.role;     
+                            //console.log("updated rate and role  to " + existingProject.rate + " project name = " + existingProject.name);              
+                            processed = true;
+                            //console.log(JSON.stringify(docs[0]));
+                        }
+                    });
+                    
+                    if (!processed){
+                        docs[0].projects.push(incomingProject);
+                    }
+
+                });
+
+                docs[0].save(function (err, result) {
+                    if (err) return console.error(err);
+                    getAllAssignments(res);
+                });
+            } else if (docs.length > 1) {
+                var errormap = {};
+                errormap["errors"] = ["There are more than one " + req.body.name + " in the system."]
+                getAllAssignments(res,errormap);
+            }
         });
+
+
 
     }
     );
@@ -182,6 +219,25 @@ var updateallocation = function (req, res) {
     }
     );
 }
+
+var removeallocation = function (req, res) {
+
+    initResources(function () {
+
+        Resource.findById(req.body.id, function (err, resource) {
+            if (err) return handleError(err);
+
+            resource.removeallocation(req.body, function () {
+                getAllAssignments(res);
+            });
+
+        });
+
+
+    }
+    );
+}
+
 
 var initResources = function (callback) {
     if (Resource == undefined) {
@@ -236,6 +292,25 @@ var initResources = function (callback) {
                 this.save(function () {
                     //var sr = {};
                     //sr["validation"] = this.validatehours();
+                    callback();
+                });
+
+
+            }
+
+            resourceSchema.methods.removeallocation = function (reqbody, callback) {
+             
+                var newprojects = [];
+
+                this.projects.forEach(project => {
+                    if(project.assignment != reqbody.assignment || project.account != reqbody.account){
+                        newprojects.push(project);
+                    }
+                });
+
+                this.projects = newprojects;
+
+                this.save(function () {
                     callback();
                 });
 
@@ -303,5 +378,6 @@ module.exports = {
     addResource,
     deleteResource,
     updateallocation,
-    getAllAssignments
+    getAllAssignments,
+    removeallocation
 }
