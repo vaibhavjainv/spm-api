@@ -58,10 +58,10 @@ var getAssignmentMap = function (resources) {
                 if (assignment.endWeek == undefined || assignment.endWeek < allocation.week) {
                     assignment["endWeek"] = allocation.week;
                 }
-                res.allocation[new Date(allocation.week).toDateString()]=allocation.hours;
-                res.totalhours=res.totalhours+allocation.hours;
+                res.allocation[new Date(allocation.week).toDateString()] = allocation.hours;
+                res.totalhours = res.totalhours + allocation.hours;
 
-                if(assignment["assignmentHours"] == undefined){
+                if (assignment["assignmentHours"] == undefined) {
                     assignment["assignmentHours"] = 0;
                 }
                 assignment["assignmentHours"] = assignment.assignmentHours + allocation.hours;
@@ -70,7 +70,7 @@ var getAssignmentMap = function (resources) {
             res["totalcost"] = res.totalhours * res.rate;
 
 
-            if(assignment["assignmentCost"] == undefined){
+            if (assignment["assignmentCost"] == undefined) {
                 assignment["assignmentCost"] = 0;
             }
             assignment["assignmentCost"] = assignment.assignmentCost + res.totalcost;
@@ -87,19 +87,19 @@ var getAssignmentMap = function (resources) {
     for (var assignmentname in assignmentMap) {
         assignment = assignmentMap[assignmentname]
         assignment["weeks"] = [];
-        
+
         var nextWeek = new Date(assignment.startWeek);
         var endWeek = new Date(assignment.endWeek);
 
         assignment.weeks[assignment.weeks.length] = nextWeek.toDateString();
-       
+
         var contine = true;
 
         while (contine) {
             nextWeek.setDate(nextWeek.getDate() + 7);
             if (nextWeek < endWeek) {
                 assignment.weeks[assignment.weeks.length] = nextWeek.toDateString();
-            }else{
+            } else {
                 assignment.weeks[assignment.weeks.length] = endWeek.toDateString();
                 contine = false;
             }
@@ -168,12 +168,14 @@ var updateallocation = function (req, res) {
 
     initResources(function () {
 
-        Resource.findById(req.body._id, function (err, resource) {
+        Resource.findById(req.body.id, function (err, resource) {
             if (err) return handleError(err);
 
-            var update = resource.updateallocation(req.body.projects);
+            resource.updateallocation(req.body.projects, function () {
+                getAllAssignments(res);
+                //res.status(200).send(update);
+            });
 
-            res.status(200).send(update);
         });
 
 
@@ -207,11 +209,12 @@ var initResources = function (callback) {
                 ]
             });
 
-            resourceSchema.methods.updateallocation = function (projects) {
-
+            resourceSchema.methods.updateallocation = function (projects, callback) {
+                var needtosave = false;
                 if (this.projects.length == 0) {
                     this.projects = projects;
-                    this.save();
+                    //this.save();
+                    needtosave = true;
                 } else {
                     projects.forEach(project => {
                         var updated = false;
@@ -225,13 +228,18 @@ var initResources = function (callback) {
                         if (!updated) {
                             this.projects.push(project);
                         }
-                        this.save();
+                        needtosave = true;
+                        //this.save();
                     });
                 }
 
-                var sr = {};
-                sr["validation"] = this.validatehours();
-                return (sr);
+                this.save(function () {
+                    //var sr = {};
+                    //sr["validation"] = this.validatehours();
+                    callback();
+                });
+
+
             }
 
             resourceSchema.methods.validatehours = function () {

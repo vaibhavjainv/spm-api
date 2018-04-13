@@ -36,19 +36,25 @@ PUT http://localhost:3000/api/resources/updateallocation
 content-type: application/json
 
 {
-    "_id":"5ace3ad431370c218356c3f1",
+    "id":"5ace3ad431370c218356c3f1",
     "projects":[
-        {    
-            "account":"ABC",
-            "assignment":"123",
+        {
+            "account": "ABC",
+            "assignment": "XYZ",
+            "rate": 150,
+            "role": "Architect",
             "allocation": [
-                {
+               {
                     "week": "5/9/2018",
-                    "hours": 10
+                    "hours": "20"
+                },
+                {
+                    "week": "5/30/2018",
+                    "hours": "20"
                 },
                 {
                     "week": "5/16/2018",
-                    "hours": 24
+                    "hours": "10"
                 }
             ]
         }
