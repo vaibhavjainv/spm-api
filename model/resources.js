@@ -25,7 +25,9 @@ var getAllResources = function (res) {
 }
 
 var getAssignmentMap = function (resources) {
-    var assignmentMap = {}
+    var assignmentMap = {};
+    var globalStartWeek, globalEndWeek;
+
     resources.forEach(resource => {
         resource.projects.forEach(project => {
             var key = project.account + "-" + project.assignment;
@@ -54,9 +56,15 @@ var getAssignmentMap = function (resources) {
             project.allocation.forEach(allocation => {
                 if (assignment.startWeek == undefined || assignment.startWeek > allocation.week) {
                     assignment["startWeek"] = allocation.week;
+                    if (globalStartWeek == undefined || allocation.week < globalStartWeek) {
+                        globalStartWeek = allocation.week;
+                    }
                 }
                 if (assignment.endWeek == undefined || assignment.endWeek < allocation.week) {
                     assignment["endWeek"] = allocation.week;
+                    if (globalEndWeek == undefined || allocation.week > globalEndWeek) {
+                        globalEndWeek = allocation.week;
+                    }
                 }
                 res.allocation[new Date(allocation.week).toDateString()] = allocation.hours;
                 res.totalhours = res.totalhours + allocation.hours;
@@ -108,11 +116,39 @@ var getAssignmentMap = function (resources) {
         assignmentArr.push(assignment);
     }
 
+   
+    var metadata = {}
+    metadata["globalStartWeek"] = globalStartWeek.toDateString();
+    metadata["globalEndWeek"] = globalEndWeek.toDateString();
 
-    return assignmentArr;
+    var allweeks = [];
+    var contine = true;
+    var iterDate;
+    while(contine){
+        if(iterDate == undefined){
+            iterDate = globalStartWeek;
+        }else{
+            iterDate.setDate(iterDate.getDate() + 7);
+            if(iterDate >= globalEndWeek){
+                contine = false;
+            }
+        }
+        allweeks.push(iterDate.toDateString())
+    }
+
+    metadata["allweeks"] = allweeks;
+
+    assignmentMap = {};
+    assignmentMap["assignments"] = assignmentArr;
+    assignmentMap["metadata"] = metadata;
+    
+
+//    assignmentArr.push(metadata);
+
+    return assignmentMap;
 }
 
-var getAllAssignments = function (res,errormap) {
+var getAllAssignments = function (res, errormap) {
 
     initResources(function () {
         Resource.find(function (err, resources) {
@@ -122,7 +158,7 @@ var getAllAssignments = function (res,errormap) {
 
             var assignmentMap = getAssignmentMap(resources);
 
-            if(errormap!=undefined){
+            if (errormap != undefined) {
                 assignmentMap.push(errormap);
             }
 
@@ -153,18 +189,18 @@ var addResource = function (req, res) {
             } else if (docs.length == 1) {
                 req.body.projects.forEach(incomingProject => {
                     var processed = false;
-                   
+
                     docs[0].projects.forEach(existingProject => {
                         if (existingProject.assignment == incomingProject.assignment && existingProject.account == incomingProject.account && !processed) {
                             existingProject.rate = incomingProject.rate;
-                            existingProject.role = incomingProject.role;     
+                            existingProject.role = incomingProject.role;
                             //console.log("updated rate and role  to " + existingProject.rate + " project name = " + existingProject.name);              
                             processed = true;
                             //console.log(JSON.stringify(docs[0]));
                         }
                     });
-                    
-                    if (!processed){
+
+                    if (!processed) {
                         docs[0].projects.push(incomingProject);
                     }
 
@@ -177,7 +213,7 @@ var addResource = function (req, res) {
             } else if (docs.length > 1) {
                 var errormap = {};
                 errormap["errors"] = ["There are more than one " + req.body.name + " in the system."]
-                getAllAssignments(res,errormap);
+                getAllAssignments(res, errormap);
             }
         });
 
@@ -299,11 +335,11 @@ var initResources = function (callback) {
             }
 
             resourceSchema.methods.removeallocation = function (reqbody, callback) {
-             
+
                 var newprojects = [];
 
                 this.projects.forEach(project => {
-                    if(project.assignment != reqbody.assignment || project.account != reqbody.account){
+                    if (project.assignment != reqbody.assignment || project.account != reqbody.account) {
                         newprojects.push(project);
                     }
                 });
