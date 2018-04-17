@@ -5,14 +5,18 @@ GET http://localhost:3000/api/assignments/getall
 POST http://localhost:3000/api/resources/add
 content-type: application/json
 
+{"projects":[{"rate":175,"role":"Architect","account":"ABC","assignment":"AAD"}],"name":"Vaibhav","location":"onshore"}
+
+
+
 {
-    "name": "Abhinav G",
+    "name": "Abhinav V",
     "location": "onshore",
     "projects": [
         {
             "account": "ABC",
             "assignment": "AAE",
-            "rate": 150,
+            "rate": 155,
             "role": "Architect",
             "allocation": [
                {
@@ -65,7 +69,7 @@ content-type: application/json
             "role": "Architect",
             "allocation": [
                {
-                    "week": "5/9/2018",k
+                    "week": "5/9/2018",
                     "hours": "20"
                 },
                 {
@@ -84,3 +88,12 @@ content-type: application/json
 
 
 DELETE  http://localhost:3000/api/resources/delete/5ace00203b4b903296621284
+
+PUT http://localhost:3000/api/resources/removeallocation
+content-type: application/json
+
+{
+    "id":"5ad0de3544bcd4ca6d0e19c8",
+    "assignment":"AAD",
+    "account":"ABC"
+}
