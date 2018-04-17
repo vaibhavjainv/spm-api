@@ -8,9 +8,11 @@ content-type: application/json
 {"projects":[{"rate":175,"role":"Architect","account":"ABC","assignment":"AAD"}],"name":"Vaibhav","location":"onshore"}
 
 
+POST http://35.164.158.77:32769/api/resources/add
+content-type: application/json
 
 {
-    "name": "Abhinav V",
+    "name": "John Doe",
     "location": "onshore",
     "projects": [
         {
@@ -97,3 +99,7 @@ content-type: application/json
     "assignment":"AAD",
     "account":"ABC"
 }
+
+
+
+GET http://35.164.158.77:32769/api/resources/getall

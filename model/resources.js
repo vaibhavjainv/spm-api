@@ -118,6 +118,14 @@ var getAssignmentMap = function (resources) {
 
    
     var metadata = {}
+    if(globalStartWeek == undefined){
+        globalStartWeek = new Date();
+    }
+
+    if(globalEndWeek == undefined){
+        globalEndWeek = new Date();
+    }
+
     metadata["globalStartWeek"] = globalStartWeek.toDateString();
     metadata["globalEndWeek"] = globalEndWeek.toDateString();
 
