@@ -57,13 +57,13 @@ var getAssignmentMap = function (resources) {
                 if (assignment.startWeek == undefined || assignment.startWeek > allocation.week) {
                     assignment["startWeek"] = allocation.week;
                     if (globalStartWeek == undefined || allocation.week < globalStartWeek) {
-                        globalStartWeek = allocation.week;
+                        globalStartWeek = new Date(allocation.week);
                     }
                 }
                 if (assignment.endWeek == undefined || assignment.endWeek < allocation.week) {
                     assignment["endWeek"] = allocation.week;
                     if (globalEndWeek == undefined || allocation.week > globalEndWeek) {
-                        globalEndWeek = allocation.week;
+                        globalEndWeek = new Date(allocation.week);
                     }
                 }
                 res.allocation[new Date(allocation.week).toDateString()] = allocation.hours;
