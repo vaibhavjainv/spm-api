@@ -24,6 +24,34 @@ var getAllResources = function (res) {
     );
 }
 
+var getResourceDetails = function (req, res) {
+
+    initResources(function () {
+
+        Resource.findById(req.params.id, function (err, resource) {
+            if (err) return handleError(err);
+
+            resource.projects.forEach(project => {
+                var totalhours = 0;
+                var totalcost = 0;
+                project.allocation.forEach(allocation => {
+                    totalhours = totalhours + allocation.hours;
+                });
+                project.hours = totalhours;
+                project.cost = totalhours * project.rate;
+            });
+
+
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+            res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+            res.status(200).send(resource);
+
+        });
+    }
+    );
+}
+
 var getAssignmentMap = function (resources) {
     var assignmentMap = {};
     var globalStartWeek, globalEndWeek;
@@ -116,13 +144,13 @@ var getAssignmentMap = function (resources) {
         assignmentArr.push(assignment);
     }
 
-   
+
     var metadata = {}
-    if(globalStartWeek == undefined){
+    if (globalStartWeek == undefined) {
         globalStartWeek = new Date();
     }
 
-    if(globalEndWeek == undefined){
+    if (globalEndWeek == undefined) {
         globalEndWeek = new Date();
     }
 
@@ -132,12 +160,12 @@ var getAssignmentMap = function (resources) {
     var allweeks = [];
     var contine = true;
     var iterDate;
-    while(contine){
-        if(iterDate == undefined){
+    while (contine) {
+        if (iterDate == undefined) {
             iterDate = globalStartWeek;
-        }else{
+        } else {
             iterDate.setDate(iterDate.getDate() + 7);
-            if(iterDate >= globalEndWeek){
+            if (iterDate >= globalEndWeek) {
                 contine = false;
             }
         }
@@ -149,9 +177,9 @@ var getAssignmentMap = function (resources) {
     assignmentMap = {};
     assignmentMap["assignments"] = assignmentArr;
     assignmentMap["metadata"] = metadata;
-    
 
-//    assignmentArr.push(metadata);
+
+    //    assignmentArr.push(metadata);
 
     return assignmentMap;
 }
@@ -299,6 +327,8 @@ var initResources = function (callback) {
                         assignment: String,
                         rate: Number,
                         role: String,
+                        hours: Number,
+                        cost: Number,
                         allocation: [
                             {
                                 week: Date,
@@ -423,5 +453,6 @@ module.exports = {
     deleteResource,
     updateallocation,
     getAllAssignments,
-    removeallocation
+    removeallocation,
+    getResourceDetails
 }
