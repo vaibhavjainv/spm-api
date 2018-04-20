@@ -38,6 +38,7 @@ var getResourceDetails = function (req, res) {
             resource.projects.forEach(project => {
                 var totalhours = 0;
                 var totalcost = 0;
+                var projHrMap = {};
                 project.allocation.forEach(allocation => {
                     totalhours = totalhours + allocation.hours;
 
@@ -56,9 +57,13 @@ var getResourceDetails = function (req, res) {
                         totalhoursmap[key] = totalhoursmap[key] + allocation.hours;
                       }
 
+                      projHrMap[key] = allocation.hours;
+
                 });
+
                 project.hours = totalhours;
                 project.cost = totalhours * project.rate;
+                project["projHrMap"] = projHrMap;
             });
 
             var allweeks = [];
@@ -73,7 +78,7 @@ var getResourceDetails = function (req, res) {
                         proceed = false;
                     }
                 }
-                allweeks.push(new Date(iterDate.toDateString()));
+                allweeks.push(iterDate.toDateString());
             }
             
             resource.weeks = allweeks;
@@ -368,6 +373,7 @@ var initResources = function (callback) {
                         role: String,
                         hours: Number,
                         cost: Number,
+                        projHrMap: {},
                         allocation: [
                             {
                                 week: Date,
