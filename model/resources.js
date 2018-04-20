@@ -31,16 +31,51 @@ var getResourceDetails = function (req, res) {
         Resource.findById(req.params.id, function (err, resource) {
             if (err) return handleError(err);
 
+            var startWeek, endWeek;
+            var totalhoursmap = {};
+            
+
             resource.projects.forEach(project => {
                 var totalhours = 0;
                 var totalcost = 0;
                 project.allocation.forEach(allocation => {
                     totalhours = totalhours + allocation.hours;
+
+                    if (startWeek == undefined || startWeek > allocation.week) {
+                        startWeek = new Date(allocation.week);
+                    }
+                    if (endWeek == undefined || endWeek < allocation.week) {
+                        endWeek = new Date(allocation.week);
+                    }
+
+                    if(totalhoursmap[new Date(allocation.week)] == undefined){
+                        totalhoursmap[new Date(allocation.week)] = allocation.hours;
+                      }else{
+                        totalhoursmap[new Date(allocation.week)] = totalhoursmap[new Date(allocation.week)] + allocation.hours;
+                      }
+
                 });
                 project.hours = totalhours;
                 project.cost = totalhours * project.rate;
             });
 
+            var allweeks = [];
+            var proceed = true;
+            var iterDate;
+            while (proceed) {
+                if (iterDate == undefined) {
+                    iterDate = startWeek;
+                } else {
+                    iterDate.setDate(iterDate.getDate() + 7);
+                    if (iterDate >= endWeek) {
+                        proceed = false;
+                    }
+                }
+                allweeks.push(new Date(iterDate.toDateString()));
+            }
+            
+            resource.weeks = allweeks;
+            resource.totalhoursmap = totalhoursmap;
 
             res.setHeader('Access-Control-Allow-Origin', '*');
             res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -321,6 +356,8 @@ var initResources = function (callback) {
             var resourceSchema = mongoose.Schema({
                 name: String,
                 location: String,
+                weeks: [],
+                totalhoursmap: {},
                 projects: [
                     {
                         account: String,
