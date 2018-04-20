@@ -48,10 +48,12 @@ var getResourceDetails = function (req, res) {
                         endWeek = new Date(allocation.week);
                     }
 
-                    if(totalhoursmap[new Date(allocation.week)] == undefined){
-                        totalhoursmap[new Date(allocation.week)] = allocation.hours;
+                    var key = new Date(allocation.week).toDateString();
+
+                    if(totalhoursmap[key] == undefined){
+                        totalhoursmap[key] = allocation.hours;
                       }else{
-                        totalhoursmap[new Date(allocation.week)] = totalhoursmap[new Date(allocation.week)] + allocation.hours;
+                        totalhoursmap[key] = totalhoursmap[key] + allocation.hours;
                       }
 
                 });
