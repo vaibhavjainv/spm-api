@@ -17,6 +17,10 @@ var appRouter = function (app) {
     app.put("/api/resources/updateallocation", function (req, res) {
         resources.updateallocation(req, res);
     });
+
+    app.put("/api/resources/updatesequence", function (req, res) {
+        resources.updatesequence(req, res);
+    });
     
     app.put("/api/resources/removeallocation", function (req, res) {
         resources.removeallocation(req, res);
