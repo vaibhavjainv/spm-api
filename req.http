@@ -1,4 +1,7 @@
 GET http://localhost:3000/api/resources/getall
+GET http://localhost:3000/api/assignments/getallcsv
+
+
 
 GET http://localhost:3000/api/resources/getdetails/5ada16cc7ab3e758d3b34500
 

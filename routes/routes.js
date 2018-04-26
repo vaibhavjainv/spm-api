@@ -34,6 +34,10 @@ var appRouter = function (app) {
         resources.getAllAssignments(res);
     });
 
+    app.get("/api/assignments/getallcsv", function (req, res) {
+        resources.getAllAssignmentsCSV(res);
+    });
+
     app.options("*", function (req, res) {
         // Website you wish to allow to connect
         res.setHeader('Access-Control-Allow-Origin', '*');

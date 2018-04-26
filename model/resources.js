@@ -124,7 +124,7 @@ var getAssignmentMap = function (resources) {
       res['allocation'] = {}
       res['totalhours'] = 0
       res['id'] = resource._id
-      res['preseq'] = project.preseq != undefined ? project.preseq : 0;
+      res['preseq'] = project.preseq != undefined ? project.preseq : 0
 
       project.allocation.forEach(allocation => {
         if (
@@ -277,6 +277,68 @@ var getAllAssignments = function (res, errormap) {
   })
 }
 
+var getAllAssignmentsCSV = function (res, errormap) {
+  initResources(function () {
+    Resource.find().sort('-location name').exec(function (err, resources) {
+      if (err) return console.error(err)
+      var data = resources
+
+      var assignmentMap = getAssignmentMap(resources)
+
+      if (errormap != undefined) {
+        assignmentMap.push(errormap)
+      }
+
+      var filecontent = ''
+      assignmentMap.assignments.forEach(assignment => {
+        filecontent = filecontent + '\n\n\n\n' + assignment.name
+        filecontent = filecontent + '\nName,Location,Rate,Role,Hours,Cost'
+
+        assignmentMap.metadata.allweeks.forEach(week => {
+          filecontent = filecontent + ',' + week
+        })
+
+        assignment.resources.forEach(resource => {
+          filecontent = filecontent + '\n'
+          filecontent =
+            filecontent +
+            resource.name +
+            ',' +
+            resource.location +
+            ',' +
+            resource.rate +
+            ',' +
+            resource.role +
+            ',' +
+            resource.totalhours +
+            ',' +
+            resource.totalcost
+
+            assignmentMap.metadata.allweeks.forEach(week => {
+            filecontent = filecontent + ',' + (resource.allocation[week] !=
+              undefined
+              ? resource.allocation[week]
+              : 0)
+          })
+        })
+      })
+
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader(
+        'Access-Control-Allow-Methods',
+        'GET, POST, OPTIONS, PUT, PATCH, DELETE'
+      )
+      res.setHeader(
+        'Access-Control-Allow-Headers',
+        'X-Requested-With,content-type'
+      )
+      res.setHeader('Content-Type', 'text/csv');
+
+      res.status(200).send(filecontent)
+    })
+  })
+}
+
 var addResource = function (req, res) {
   initResources(function () {
     Resource.find(
@@ -356,10 +418,10 @@ var updatesequence = function (req, res) {
         if (err) return handleError(err)
 
         resource.updatesequence(element, function () {
-          if (index == req.body.length-1) {
-            getAllAssignments(res);
-          }else{
-            index++;
+          if (index == req.body.length - 1) {
+            getAllAssignments(res)
+          } else {
+            index++
           }
         })
       })
@@ -380,11 +442,17 @@ var removeallocation = function (req, res) {
 }
 
 var initResources = function (callback) {
+
+  var config = require('../config/config');
+
+  const fs = require('fs');
+  var dburl = fs.readFileSync(config.dburl,'utf8').trim();
+
+
   if (Resource == undefined) {
     var mongoose = require('mongoose')
-    mongoose.connect(
-      'mongodb:/'
-    )
+    console.log(dburl);
+    mongoose.connect(dburl);
     var db = mongoose.connection
     db.on('error', console.error.bind(console, 'connection error:'))
     db.once('open', function () {
@@ -545,5 +613,6 @@ module.exports = {
   getAllAssignments,
   removeallocation,
   getResourceDetails,
-  updatesequence
+  updatesequence,
+  getAllAssignmentsCSV
 }
