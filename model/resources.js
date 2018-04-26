@@ -451,7 +451,6 @@ var initResources = function (callback) {
 
   if (Resource == undefined) {
     var mongoose = require('mongoose')
-    console.log(dburl);
     mongoose.connect(dburl);
     var db = mongoose.connection
     db.on('error', console.error.bind(console, 'connection error:'))

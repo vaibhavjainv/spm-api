@@ -1,6 +1,5 @@
 var config = {};
 
-config.dburl = "/Users/vaibhavj/Documents/Node/spm-db-path";
-
+config.dburl = "/run/secrets/spm-db-path";
 
 module.exports = config;
