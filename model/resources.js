@@ -31,56 +31,11 @@ var getResourceDetails = function (req, res) {
     Resource.findById(req.params.id, function (err, resource) {
       if (err) return handleError(err)
 
-      var startWeek, endWeek
-      var totalhoursmap = {}
+      getResourceInfo(resource);
 
-      resource.projects.forEach(project => {
-        var totalhours = 0
-        var totalcost = 0
-        var projHrMap = {}
-        project.allocation.forEach(allocation => {
-          totalhours = totalhours + allocation.hours
+      var resourceArr = [];
 
-          if (startWeek == undefined || startWeek > allocation.week) {
-            startWeek = new Date(allocation.week)
-          }
-          if (endWeek == undefined || endWeek < allocation.week) {
-            endWeek = new Date(allocation.week)
-          }
-
-          var key = new Date(allocation.week).toDateString()
-
-          if (totalhoursmap[key] == undefined) {
-            totalhoursmap[key] = allocation.hours
-          } else {
-            totalhoursmap[key] = totalhoursmap[key] + allocation.hours
-          }
-
-          projHrMap[key] = allocation.hours
-        })
-
-        project.hours = totalhours
-        project.cost = totalhours * project.rate
-        project['projHrMap'] = projHrMap
-      })
-
-      var allweeks = []
-      var proceed = true
-      var iterDate
-      while (proceed) {
-        if (iterDate == undefined) {
-          iterDate = startWeek
-        } else {
-          iterDate.setDate(iterDate.getDate() + 7)
-          if (iterDate >= endWeek) {
-            proceed = false
-          }
-        }
-        allweeks.push(iterDate.toDateString())
-      }
-
-      resource.weeks = allweeks
-      resource.totalhoursmap = totalhoursmap
+      resourceArr.push(resource);
 
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader(
@@ -91,7 +46,33 @@ var getResourceDetails = function (req, res) {
         'Access-Control-Allow-Headers',
         'X-Requested-With,content-type'
       )
-      res.status(200).send(resource)
+      res.status(200).send(resourceArr)
+    })
+  })
+}
+
+var getAllResourceDetails = function (req, res) {
+  initResources(function () {
+    Resource.find(function (err, resources) {
+      if (err) return handleError(err)
+
+      var resourceArr = []
+      resources.forEach(resource => {
+        getResourceInfo(resource)
+        resourceArr.push(resource);
+      })
+      // getResourceInfo(resource);
+
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader(
+        'Access-Control-Allow-Methods',
+        'GET, POST, OPTIONS, PUT, PATCH, DELETE'
+      )
+      res.setHeader(
+        'Access-Control-Allow-Headers',
+        'X-Requested-With,content-type'
+      )
+      res.status(200).send(resourceArr)
     })
   })
 }
@@ -314,11 +295,13 @@ var getAllAssignmentsCSV = function (res, errormap) {
             ',' +
             resource.totalcost
 
-            assignmentMap.metadata.allweeks.forEach(week => {
-            filecontent = filecontent + ',' + (resource.allocation[week] !=
-              undefined
-              ? resource.allocation[week]
-              : 0)
+          assignmentMap.metadata.allweeks.forEach(week => {
+            filecontent =
+              filecontent +
+              ',' +
+              (resource.allocation[week] != undefined
+                ? resource.allocation[week]
+                : 0)
           })
         })
       })
@@ -332,7 +315,7 @@ var getAllAssignmentsCSV = function (res, errormap) {
         'Access-Control-Allow-Headers',
         'X-Requested-With,content-type'
       )
-      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Type', 'text/csv')
 
       res.status(200).send(filecontent)
     })
@@ -392,7 +375,28 @@ var deleteResource = function (req, res) {
     Resource.remove({ _id: req.params.id }, function (err) {
       if (err) return handleError(err)
       // res.status(200).send('Deleted');
-      getAllAssignments(res)
+      //getAllAssignments(res)
+      Resource.find(function (err, resources) {
+        if (err) return handleError(err)
+  
+        var resourceArr = []
+        resources.forEach(resource => {
+          getResourceInfo(resource)
+          resourceArr.push(resource);
+        })
+        // getResourceInfo(resource);
+  
+        res.setHeader('Access-Control-Allow-Origin', '*')
+        res.setHeader(
+          'Access-Control-Allow-Methods',
+          'GET, POST, OPTIONS, PUT, PATCH, DELETE'
+        )
+        res.setHeader(
+          'Access-Control-Allow-Headers',
+          'X-Requested-With,content-type'
+        )
+        res.status(200).send(resourceArr)
+      })
     })
   })
 }
@@ -442,16 +446,14 @@ var removeallocation = function (req, res) {
 }
 
 var initResources = function (callback) {
+  var config = require('../config/config')
 
-  var config = require('../config/config');
-
-  const fs = require('fs');
-  var dburl = fs.readFileSync(config.dburl,'utf8').trim();
-
+  const fs = require('fs')
+  var dburl = fs.readFileSync(config.dburl, 'utf8').trim()
 
   if (Resource == undefined) {
     var mongoose = require('mongoose')
-    mongoose.connect(dburl);
+    mongoose.connect(dburl)
     var db = mongoose.connection
     db.on('error', console.error.bind(console, 'connection error:'))
     db.once('open', function () {
@@ -613,5 +615,55 @@ module.exports = {
   removeallocation,
   getResourceDetails,
   updatesequence,
-  getAllAssignmentsCSV
+  getAllAssignmentsCSV,
+  getAllResourceDetails
+}
+
+function getResourceInfo (resource) {
+  var startWeek, endWeek
+  var totalhoursmap = {}
+  resource.projects.forEach(project => {
+    var totalhours = 0
+    var totalcost = 0
+    var projHrMap = {}
+    project.allocation.forEach(allocation => {
+      totalhours = totalhours + allocation.hours
+      if (startWeek == undefined || startWeek > allocation.week) {
+        startWeek = new Date(allocation.week)
+      }
+      if (endWeek == undefined || endWeek < allocation.week) {
+        endWeek = new Date(allocation.week)
+      }
+      var key = new Date(allocation.week).toDateString()
+      if (totalhoursmap[key] == undefined) {
+        totalhoursmap[key] = allocation.hours
+      } else {
+        totalhoursmap[key] = totalhoursmap[key] + allocation.hours
+      }
+      projHrMap[key] = allocation.hours
+    })
+    project.hours = totalhours
+    project.cost = totalhours * project.rate
+    project['projHrMap'] = projHrMap
+  })
+  var allweeks = []
+  var proceed = true
+  var iterDate
+  while (proceed) {
+    if (iterDate == undefined) {
+      iterDate = startWeek
+    } else {
+      iterDate.setDate(iterDate.getDate() + 7)
+      if (iterDate >= endWeek) {
+        proceed = false
+      }
+    }
+    if (iterDate != undefined) {
+      allweeks.push(iterDate.toDateString())
+    }else{
+      proceed = false;
+    }
+  }
+  resource.weeks = allweeks
+  resource.totalhoursmap = totalhoursmap
 }

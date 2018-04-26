@@ -10,6 +10,10 @@ var appRouter = function (app) {
         resources.getResourceDetails(req, res);
     });
 
+    app.get("/api/resources/getallwithdetails", function (req, res) {
+        resources.getAllResourceDetails(req, res);
+    });
+
     app.post("/api/resources/add", function (req, res) {
         resources.addResource(req, res);
     });

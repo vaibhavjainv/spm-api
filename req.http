@@ -1,9 +1,10 @@
-GET http://localhost:3000/api/resources/getall
+GET http://54.245.201.253:3000/api/resources/getall
 GET http://localhost:3000/api/assignments/getallcsv
 
+GET http://localhost:3000/api/resources/getdetails/5adfbf1fccd4192ea0495f5e
 
+GET http://localhost:3000/api/resources/getallwithdetails
 
-GET http://localhost:3000/api/resources/getdetails/5ada16cc7ab3e758d3b34500
 
 GET http://spm-api-749052067.us-west-2.elb.amazonaws.com/api/resources/getdetails/5ada16cc7ab3e758d3b34500
 
