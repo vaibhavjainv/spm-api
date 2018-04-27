@@ -42,6 +42,12 @@ var appRouter = function (app) {
         resources.getAllAssignmentsCSV(res);
     });
 
+    app.put("/api/resources/updatename", function (req, res) {
+        resources.updatename(req, res);
+    });
+    
+    
+    
     app.options("*", function (req, res) {
         // Website you wish to allow to connect
         res.setHeader('Access-Control-Allow-Origin', '*');

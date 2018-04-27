@@ -31,11 +31,11 @@ var getResourceDetails = function (req, res) {
     Resource.findById(req.params.id, function (err, resource) {
       if (err) return handleError(err)
 
-      getResourceInfo(resource);
+      getResourceInfo(resource)
 
-      var resourceArr = [];
+      var resourceArr = []
 
-      resourceArr.push(resource);
+      resourceArr.push(resource)
 
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader(
@@ -59,7 +59,7 @@ var getAllResourceDetails = function (req, res) {
       var resourceArr = []
       resources.forEach(resource => {
         getResourceInfo(resource)
-        resourceArr.push(resource);
+        resourceArr.push(resource)
       })
       // getResourceInfo(resource);
 
@@ -375,17 +375,17 @@ var deleteResource = function (req, res) {
     Resource.remove({ _id: req.params.id }, function (err) {
       if (err) return handleError(err)
       // res.status(200).send('Deleted');
-      //getAllAssignments(res)
+      // getAllAssignments(res)
       Resource.find(function (err, resources) {
         if (err) return handleError(err)
-  
+
         var resourceArr = []
         resources.forEach(resource => {
           getResourceInfo(resource)
-          resourceArr.push(resource);
+          resourceArr.push(resource)
         })
         // getResourceInfo(resource);
-  
+
         res.setHeader('Access-Control-Allow-Origin', '*')
         res.setHeader(
           'Access-Control-Allow-Methods',
@@ -396,6 +396,38 @@ var deleteResource = function (req, res) {
           'X-Requested-With,content-type'
         )
         res.status(200).send(resourceArr)
+      })
+    })
+  })
+}
+
+var updatename = function (req, res) {
+  initResources(function () {
+    Resource.findById(req.body._id, function (err, resource) {
+      if (err) return handleError(err)
+
+      resource.name = req.body.name
+      resource.save(function () {
+        Resource.find(function (err, resources) {
+          if (err) return handleError(err)
+
+          var resourceArr = []
+          resources.forEach(resource => {
+            getResourceInfo(resource)
+            resourceArr.push(resource)
+          })
+
+          res.setHeader('Access-Control-Allow-Origin', '*')
+          res.setHeader(
+            'Access-Control-Allow-Methods',
+            'GET, POST, OPTIONS, PUT, PATCH, DELETE'
+          )
+          res.setHeader(
+            'Access-Control-Allow-Headers',
+            'X-Requested-With,content-type'
+          )
+          res.status(200).send(resourceArr)
+        })
       })
     })
   })
@@ -616,7 +648,8 @@ module.exports = {
   getResourceDetails,
   updatesequence,
   getAllAssignmentsCSV,
-  getAllResourceDetails
+  getAllResourceDetails,
+  updatename
 }
 
 function getResourceInfo (resource) {
@@ -660,8 +693,8 @@ function getResourceInfo (resource) {
     }
     if (iterDate != undefined) {
       allweeks.push(iterDate.toDateString())
-    }else{
-      proceed = false;
+    } else {
+      proceed = false
     }
   }
   resource.weeks = allweeks
