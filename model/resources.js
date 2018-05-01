@@ -61,7 +61,6 @@ var getAllResourceDetails = function (req, res) {
         getResourceInfo(resource)
         resourceArr.push(resource)
       })
-      // getResourceInfo(resource);
 
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader(
@@ -446,6 +445,29 @@ var updateallocation = function (req, res) {
   })
 }
 
+var updaterate = function (req, res) {
+  initResources(function () {
+    Resource.findById(req.body.resource.id, function (err, resource) {
+      if (err) return handleError(err)
+      console.log(resource.name);
+      console.log(req.body);
+
+      resource.projects.forEach(project => {
+        if (project.assignment == req.body.assignment.name && project.account == req.body.assignment.account){
+          project.rate = req.body.resource.rate;
+          console.log("set new rate to " + req.body.resource.rate);
+        }
+      });
+
+    resource.save(function (err, resource) {
+        if (err) return console.error(err)
+        getAllAssignments(res)
+      })
+
+    })
+  })
+}
+
 var updatesequence = function (req, res) {
   var index = 0
   initResources(function () {
@@ -649,7 +671,8 @@ module.exports = {
   updatesequence,
   getAllAssignmentsCSV,
   getAllResourceDetails,
-  updatename
+  updatename,
+  updaterate
 }
 
 function getResourceInfo (resource) {

@@ -22,6 +22,10 @@ var appRouter = function (app) {
         resources.updateallocation(req, res);
     });
 
+    app.put("/api/resources/updaterate", function (req, res) {
+        resources.updaterate(req, res);
+    });
+
     app.put("/api/resources/updatesequence", function (req, res) {
         resources.updatesequence(req, res);
     });
